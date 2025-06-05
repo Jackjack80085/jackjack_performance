@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pet Me Dawg</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      background: black;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: 0;
+      background: radial-gradient(circle at center, #ff00cc, #3300ff, #000);
+      background-size: 200% 200%;
+      animation: pulse 10s infinite ease-in-out alternate;
+      filter: blur(80px) brightness(1.5) contrast(2);
+    }
+
+    @keyframes pulse {
+      0% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+      100% { background-position: 0% 100%; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 3;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #petButton {
+      background-color: pink;
+      color: white;
+      padding: 20px 40px;
+      font-size: 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: transform 0.5s ease, opacity 0.5s ease, background-color 1s ease;
+      animation: colorCycle 2s infinite alternate;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    @keyframes colorCycle {
+      0%   { background-color: #ff00cc; }
+      25%  { background-color: #ff6600; }
+      50%  { background-color: #00ffcc; }
+      75%  { background-color: #3333ff; }
+      100% { background-color: #ffcc00; }
+    }
+
+    #dogAnimation {
+      display: none;
+      margin-top: 40px;
+      width: 350px;
+      border-radius: 20px;
+      animation: bounceDog 2s infinite ease-in-out;
+    }
+
+    @keyframes bounceUp {
+      0%   { transform: translateY(0); }
+      30%  { transform: translateY(-30px); }
+      50%  { transform: translateY(10px); }
+      70%  { transform: translateY(-10px); }
+      100% { transform: translateY(-500px); opacity: 0; }
+    }
+
+    @keyframes bounceDog {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-20px); }
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    @media (max-width: 480px) {
+      #petButton {
+        padding: 15px 30px;
+        font-size: 18px;
+      }
+
+      #dogAnimation {
+        width: 250px;
+        margin-top: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="background"></div>
+  <canvas id="visualizer"></canvas>
+
+  <div class="container">
+    <button id="petButton">pet me dawg</button>
+    <img
+      id="dogAnimation"
+      src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExNjVwbDJjNXo4cW9zb3BsMm9qdWM1am5jNDdvamxteHg3dGt6YXBoMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ov9jSguvMgNp2L30I/giphy.gif"
+      alt="Dancing Dog"
+    >
+  </div>
+
+  <audio
+    id="funnyAudio"
+    src="https://cdn.glitch.global/40c6040a-0a03-4f86-849e-1c55ecbc30ff/trim.mp3?v=1"
+    preload="auto"
+    loop
+  ></audio>
+
+  <script>
+    const button = document.getElementById('petButton');
+    const dog = document.getElementById('dogAnimation');
+    const audio = document.getElementById('funnyAudio');
+    const canvas = document.getElementById('visualizer');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let audioCtx, analyser, source, dataArray;
+
+    function initVisualizer() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      source = audioCtx.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      analyser.fftSize = 64;
+
+      const bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+
+      function draw() {
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const radius = 80;
+        const bars = dataArray.length;
+
+        for (let i = 0; i < bars; i++) {
+          const angle = (i / bars) * Math.PI * 2;
+          const barLength = dataArray[i] * 1.5;
+
+          const x1 = cx + Math.cos(angle) * radius;
+          const y1 = cy + Math.sin(angle) * radius;
+          const x2 = cx + Math.cos(angle) * (radius + barLength);
+          const y2 = cy + Math.sin(angle) * (radius + barLength);
+
+          ctx.strokeStyle = `hsl(${i * 10}, 100%, 50%)`;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+      }
+
+      draw();
+    }
+
+    button.addEventListener('click', () => {
+      button.style.animation = 'bounceUp 1s forwards';
+      setTimeout(() => button.style.display = 'none', 1000);
+      dog.style.display = 'block';
+
+      audio.play().then(() => {
+        initVisualizer();
+      }).catch(err => {
+        console.error("Audio playback failed:", err);
+      });
+    });
+  </script>
+
+</body>
+</html>
