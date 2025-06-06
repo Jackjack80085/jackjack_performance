@@ -22,21 +22,27 @@
       height: 100%;
       width: 100%;
       z-index: 0;
-      background: repeating-radial-gradient(circle at center, #ff00cc, #3300ff, #00ffcc, #ff6600, #ffcc00);
-      background-size: 600% 600%;
-      animation: trippyBG 10s infinite linear;
-      filter: blur(60px) brightness(2) contrast(1.5);
+      background: repeating-radial-gradient(circle at center,
+        #ff00ff 0px,
+        #00ffff 10px,
+        #ff00ff 20px,
+        #00ff00 30px,
+        #ff6600 40px,
+        #000 50px);
+      background-size: 400% 400%;
+      animation: trippy 8s linear infinite;
+      filter: blur(40px) brightness(1.2) contrast(2);
     }
 
-    @keyframes trippyBG {
+    @keyframes trippy {
       0% { background-position: 0% 0%; }
       50% { background-position: 100% 100%; }
-      100% { background-position: 0% 100%; }
+      100% { background-position: 0% 0%; }
     }
 
     .container {
       position: relative;
-      z-index: 3;
+      z-index: 2;
       height: 100vh;
       width: 100vw;
       display: flex;
@@ -45,62 +51,81 @@
       justify-content: center;
     }
 
-    #trustButton {
+    #petButton {
       background-color: purple;
       color: white;
       padding: 20px 40px;
       font-size: 24px;
-      font-weight: bold;
       border: none;
       border-radius: 12px;
       cursor: pointer;
       font-family: 'Poppins', sans-serif;
+      font-weight: bold;
       transition: opacity 1s ease;
     }
 
-    #trippyGif {
+    #petButton.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #dogAnimation {
       display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 5;
+      margin-top: 40px;
+      width: 350px;
+      border-radius: 20px;
     }
 
     canvas {
-      display: none; /* Hide canvas for now */
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    @media (max-width: 480px) {
+      #petButton {
+        padding: 15px 30px;
+        font-size: 18px;
+      }
+
+      #dogAnimation {
+        width: 250px;
+        margin-top: 30px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="background"></div>
+  <div class="background" id="bg"></div>
 
   <div class="container">
-    <button id="trustButton">trust me</button>
+    <button id="petButton">trust me</button>
+    <img
+      id="dogAnimation"
+      src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTZ4Y283angxc29oYmJqM2cxZ2NvbjhkNWppcjdqYnFrNzVmazJlbyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TYfjXKss2kCyI/giphy.gif"
+      alt="Trippy Dog"
+    >
   </div>
 
-  <img
-    id="trippyGif"
-    src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTZ4Y283angxc29oYmJqM2cxZ2NvbjhkNWppcjdqYnFrNzVmazJlbyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/TYfjXKss2kCyI/giphy.gif"
-    alt="Trippy Fullscreen GIF"
-  >
-
   <script>
-    const button = document.getElementById('trustButton');
-    const gif = document.getElementById('trippyGif');
+    const button = document.getElementById('petButton');
+    const dog = document.getElementById('dogAnimation');
+    const bg = document.getElementById('bg');
 
     button.addEventListener('click', () => {
-      button.style.opacity = '0';
+      button.classList.add('fade-out');
+      bg.style.animation = 'none'; // stop psychedelic animation
       setTimeout(() => {
         button.style.display = 'none';
-        gif.style.display = 'block';
+        dog.style.display = 'block';
+        document.body.style.background = 'black'; // ensures background stays black
       }, 1000);
     });
   </script>
 
 </body>
 </html>
+
 
